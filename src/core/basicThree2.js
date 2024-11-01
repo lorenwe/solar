@@ -171,7 +171,7 @@ export class basicThree2 {
         item.modelUrl,
         (gltf) => {
           const model = gltf.scene
-          console.log(model)
+          // console.log(model)
           // 遍历模型中的所有子对象，设置阴影接收和投射属性
           model.traverse((child) => {
             if (child.isMesh) {
@@ -190,7 +190,9 @@ export class basicThree2 {
           // 获取模型高度
           const modelHeight = this.calculateModelHeight(gltf.scene);
           // console.log('Model height:', modelHeight);
-          gltf.scene.position.set(item.position.x, modelHeight/2, item.position.y)
+          // gltf.scene.position.set(item.position.x, modelHeight/2, item.position.y)
+          gltf.scene.position.set(item.position.x, item.position.y, item.position.z)
+          gltf.scene.userData = item.name // 添加自定义属性
           this.scene.add(gltf.scene)
         },
         undefined,

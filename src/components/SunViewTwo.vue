@@ -12,21 +12,27 @@ let sun_imgUrl = require('../assets/sun.png')
 let point_imgUrl = require('../assets/compass-point.jpg')
 let threeObj = null
 onMounted(() => {
+  let model_json = '[{"name":"1\u680b","modelUrl":"https:\/\/img2.honglounews.com\/01scene.glb","position":{"x":-91.47096906514733,"y":39.9,"z":-120},"rotation":[0,0,0],"scale":[1,1,1]},{"name":"2\u680b","modelUrl":"https:\/\/img2.honglounews.com\/02scene.glb","position":{"x":-16.431140859923076,"y":40.4,"z":-120},"rotation":[0,0,0],"scale":[1,1,1]},{"name":"3\u680b","modelUrl":"https:\/\/img2.honglounews.com\/03scene.glb","position":{"x":61.13643042369219,"y":40.4,"z":-120},"rotation":[0,0,0],"scale":[1,1,1]},{"name":"5\u680b","modelUrl":"https:\/\/img2.honglounews.com\/05scene.glb","position":{"x":39.479858875359895,"y":16.5,"z":-60},"rotation":[0,0,0],"scale":[1,1,1]},{"name":"6\u680b","modelUrl":"https:\/\/img2.honglounews.com\/06scene.glb","position":{"x":-42.77681867018866,"y":16.5,"z":-60},"rotation":[0,0,0],"scale":[1,1,1]},{"name":"7\u680b","modelUrl":"https:\/\/img2.honglounews.com\/07scene.glb","position":{"x":18.38038696651327,"y":16.5,"z":-5.8},"rotation":[0,0,0],"scale":[1,1,1]},{"name":"8\u680b","modelUrl":"https:\/\/img2.honglounews.com\/08scene.glb","position":{"x":15.519981864380455,"y":16.5,"z":50},"rotation":[0,0,0],"scale":[1,1,1]}]'
+  let models = JSON.parse(model_json)
+  console.log(models)
   threeObj = new basicThree2()
   threeObj.modelUrl = './my.glb'
-  threeObj.initModel2([
-    {'modelUrl':'./my.glb', 'position': {'x': 10, 'y': 12}},
-    {'modelUrl':'./my.glb', 'position': {'x': 60, 'y': 12}}
-  ])
+  threeObj.initModel2(models)
+  // threeObj.initModel2([
+  //   {'modelUrl':'./my.glb', 'position': {'x': 10, 'y': 12}},
+  //   {'modelUrl':'./my.glb', 'position': {'x': 60, 'y': 12}}
+  // ])
   // 太阳光模拟
   initSun()
   // 延迟加载楼栋标签
   // TODO
-  // setTimeout(() => {
-  //   const { createTag, renderTag } = useTag(threeObj)
-  //   createTag()
-  //   threeObj.registRenderEvent(renderTag)
-  // }, 1200)
+  let tag_json = '[{"name":"1\u680b","modelName":"1\u680b","position":[-88.60284907737633,94,-116.65122572100361],"rotation":[0,0,0],"scale":[20,20,20]},{"name":"2\u680b","modelName":"2\u680b","position":[-16.218740347088918,94,-116.65122572100361],"rotation":[0,0,0],"scale":[20,20,20]},{"name":"3\u680b","modelName":"3\u680b","position":[60.59652941114071,94,-116.65122572100361],"rotation":[0,0,0],"scale":[20,20,20]},{"name":"5\u680b","modelName":"5\u680b","position":[38.449943087561735,42.5,-59.21949772700893],"rotation":[0,0,0],"scale":[20,20,20]},{"name":"6\u680b","modelName":"6\u680b","position":[-39.04372315494449,42.5,-59.21949772700893],"rotation":[0,0,0],"scale":[20,20,20]},{"name":"7\u680b","modelName":"7\u680b","position":[15.55572109556099,42.5,-6.820641409704699],"rotation":[0,0,0],"scale":[20,20,20]},{"name":"8\u680b","modelName":"8\u680b","position":[15.013498955659188,42.5,50.464852070929155],"rotation":[0,0,0],"scale":[20,20,20]}]'
+  let tags = JSON.parse(tag_json)
+  setTimeout(() => {
+    const { createTag, renderTag } = useTag(threeObj)
+    createTag(tags)
+    threeObj.registRenderEvent(renderTag)
+  }, 200)
   // 初始化点击事件
   initClick()
   //关闭加载弹框
@@ -108,17 +114,15 @@ const initClick = () => {
           }
         })
         // 隐藏2D模型标签（楼栋标签）
-        // TODO
-        // for (var i = threeObj.scene.children.length - 1; i >= 0; i--) {
-        //   const object = threeObj.scene.children[i]
-        //   if (object.isCSS2DObject) {
-        //     if (object.name !== clickedObject.name) {
-        //       object.element.style.opacity = 0.5
-        //     } else {
-        //       object.element.style.opacity = 1
-        //     }
-        //   }
-        // }
+        const tagNodes = scene.children.filter(child => child.isCSS2DObject)
+        // console.log(tagNodes)
+        tagNodes.forEach(node => {
+          if (node.name !== clickedObject.userData) {
+            node.element.style.opacity = 0.5
+          } else {
+            node.element.style.opacity = 1
+          }
+        })
         originalCameraPosition.value = threeObj.camera.position.clone()
         const toPosition = clickedObject.position.clone()
         // 调整相机位置和角度
@@ -139,6 +143,7 @@ const initClick = () => {
   })
 }
 
+// 返回小区按钮事件
 const backSandbox = () => {
   isShowSingle.value = false
 
@@ -160,6 +165,11 @@ const backSandbox = () => {
         child.material.opacity = 1
       }
     });
+  })
+  // 恢复2D标签透明度
+  const tagNodes = threeObj.scene.children.filter(child => child.isCSS2DObject)
+  tagNodes.forEach(node => {
+    node.element.style.opacity = 1
   })
 }
 
